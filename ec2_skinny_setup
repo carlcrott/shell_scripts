@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+#
+# Author: Carl Crott <carlcrott@gmail.com>
+# EC2 instance setup script
+# chmod 755 my_script to make executeable
+
+
+if which rvm
+then
+  echo 'YAR'
+else
+  echo 'Nar'
+fi
+
+
+
+if [[ $MACHTYPE = *linux* ]]
+then
+  echo "############################################"
+  echo "####### Configuring for Linux System #######"
+  echo "############################################"
+
+  sudo apt-get update
+  sudo apt-get upgrade
+
+  bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
+  source ~/.bashrc
+  
+  if which rvm
+  then
+    rvm get stable
+    echo "You should now exit and re-ssh in"    
+  fi
+fi
+
+
+
+if which rvm
+then
+  sudo /usr/bin/apt-get install build-essential openssl libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison subversionfi
+
+  echo "####### Installing Java #######"
+  sudo /usr/bin/apt-get install curl g++ openjdk-6-jre-headless
+  sudo /usr/bin/apt-get install ant openjdk-6-jdk
+
+  echo "####### Installing Ruby / JRuby #######"
+  rvm install jruby-1.6.7-d19
+  rvm install 1.9.3
+
+  echo "####### Installing Git #######"
+  sudo apt-get install git-core
+
+  if which git
+  then
+    git clone https://delinquentme@github.com/delinquentme/skinny-sinatra-jruby.git
+    
+    echo "####### Getting OSCAR-4 #######"
+    cd skinny-sinatra-jruby/app/ && wget http://maven.ch.cam.ac.uk/m2repo/uk/ac/cam/ch/wwmm/oscar/oscar4-all/4.1/oscar4-all-4.1-with-dependencies.jar
+
+  fi
+
+  cd ~/skinny-sinatra-jruby/
+
+  echo "####### Installing Gems #######"
+  bundle install
+
+  echo "###########################################"
+  echo "####### Your server is configured!  #######"
+  echo "###########################################"
+
+  echo "Run with command:"
+  echo "bundle exec trinidad"
+ 
+
+fi
