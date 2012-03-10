@@ -5,72 +5,100 @@
 # EC2 instance setup script
 # chmod 755 my_script to make executeable
 
+# Thanks Wayne for the example:
+# https://raw.github.com/wayneeseguin/rvm/master/contrib/bootstrap_rails_environment
 
-if which rvm
-then
-  echo 'YAR'
-else
-  echo 'Nar'
-fi
+# Automatic termination
+# http://alestic.com/2010/09/ec2-instance-termination
 
+echo "                          __________  _________________  _______                                               "
+echo "                         /\_________\/\                \/\      \                                              "
+echo "                        / / ________/_ \        __      \ \      \                                             "
+echo "                        \/_/\         \ \       \ \      \ \      \                                            "
+echo "                          /  \         \ \       \ \      \ \      \                                           "
+echo "                          \   \         \ \       \ \      \ \      \                                          "
+echo "                           \   \         \ \       \ \      \_\      \                                         "
+echo "                            \   \_________\ \_______\ \_______________\                                        "
+echo "                             \  /         / /       / /               /                                        "
+echo "                              \/_________/\/_______/\/_______________/                                         "
+echo "   ______________  _______________________  ___________  _________             ___________________             "
+echo "  /\             \/\                      \/\          \/\        \           /\                  \            "
+echo " /  \      _______\ \_______        _______\ \____      \ \        \         /  \__________        \           "
+echo " \   \     \______/_/______/\       \  ____/_/____\      \ \        \        \  / ________/\        \          "
+echo "  \   \                    \ \       \/\      ______      \ \        \        \/_/\                  \         "
+echo "   \   \____________        \ \       \ \     \    /\      \ \        \         /  \        __     ___\        "
+echo "    \  / ___________\        \ \       \ \     \__/  \      \ \        \________\__ \       \/\    \__/_____   "
+echo "     \/_/\                    \ \       \ \     \_\___\      \ \                   \ \       \ \            \  "
+echo "       /  \____________________\ \_______\ \__________________\ \___________________\ \_______\ \____________\ "
+echo "       \  /                    / /       / /                  / /                   / /       / /            / "
+echo "        \/____________________/\/_______/ /__________________/\/___________________/\/_______/\/____________/  "
 
+printf "\n \n \n"
 
-if [[ $MACHTYPE = *linux* ]]
-then
-  echo "############################################"
-  echo "####### Configuring for Linux System #######"
-  echo "############################################"
+read -p "Go? [Enter]"
 
-  sudo apt-get update
-  sudo apt-get upgrade
+if [[ $MACHTYPE = *linux* ]] ;then
+  echo "##############################################################################################################"
+  echo "#################################### Configuring for Linux System ############################################"
+  echo "##############################################################################################################"
+
+  sudo apt-get --assume-yes update
+  sudo apt-get --assume-yes upgrade
+
 
   bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
   source ~/.bashrc
   
-  if which rvm
-  then
+  if which rvm;then
     rvm get stable
-    echo "You should now exit and re-ssh in"    
+    source ~/.bashrc
+
+    sudo /usr/bin/apt-get --assume-yes install build-essential openssl libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison subversionfi
+
+    echo "############################################## Installing Java ##################################################"
+    sudo /usr/bin/apt-get --assume-yes install curl g++ openjdk-6-jre-headless
+    sudo /usr/bin/apt-get --assume-yes install ant openjdk-6-jdk
+
+    echo "########################################## Installing Ruby / JRuby ##############################################"
+    #rvm install jruby-1.6.7-d19 --debug
+    #rvm install 1.9.3 --debug
+    rvm install jruby-1.6.7-d19
+    rvm install 1.9.3
+
+  # Example here if bundler causes issues:
+  # http://beginrescueend.com/workflow/rvmrc/
+
   fi
-fi
 
+  echo "############################################### Installing Git ##################################################"
+  sudo apt-get --assume-yes install git-core
 
+  if which git; then
 
-if which rvm
-then
-  sudo /usr/bin/apt-get install build-essential openssl libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison subversionfi
-
-  echo "####### Installing Java #######"
-  sudo /usr/bin/apt-get install curl g++ openjdk-6-jre-headless
-  sudo /usr/bin/apt-get install ant openjdk-6-jdk
-
-  echo "####### Installing Ruby / JRuby #######"
-  rvm install jruby-1.6.7-d19
-  rvm install 1.9.3
-
-  echo "####### Installing Git #######"
-  sudo apt-get install git-core
-
-  if which git
-  then
-    git clone https://delinquentme@github.com/delinquentme/skinny-sinatra-jruby.git
+    git clone git://github.com/delinquentme/skinny-sinatra-jruby.git
+    echo "export rvm_trust_rvmrcs_flag=1" >> ~/.rvmrc
     
-    echo "####### Getting OSCAR-4 #######"
-    cd skinny-sinatra-jruby/app/ && wget http://maven.ch.cam.ac.uk/m2repo/uk/ac/cam/ch/wwmm/oscar/oscar4-all/4.1/oscar4-all-4.1-with-dependencies.jar
-
   fi
 
   cd ~/skinny-sinatra-jruby/
 
-  echo "####### Installing Gems #######"
-  bundle install
+  if which bundle ; then
+    echo "############################################ Installing Gems ##################################################"
+    bundle install
+  fi
 
-  echo "###########################################"
-  echo "####### Your server is configured!  #######"
-  echo "###########################################"
+  echo "##############################################################################################################"
+  echo "############################################ Server configured. ##############################################"
+  echo "##############################################################################################################"
 
   echo "Run with command:"
   echo "bundle exec trinidad"
- 
+
+
+  PUB_DNS=$(wget -s http://169.254.169.254/latest/meta-data/public-hostname)
+  echo "hit server at: ${PUB_DNS}:3000"
+
+  INST_ID=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)
+  echo "kill with: $ ec2kill ${INST_ID}"
 
 fi
