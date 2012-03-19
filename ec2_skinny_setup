@@ -48,6 +48,7 @@ if [[ $MACHTYPE = *linux* ]] ;then
 
   bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
   source ~/.bashrc
+  rvm reload
   
   if which rvm;then
     rvm get stable
