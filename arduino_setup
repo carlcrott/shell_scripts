@@ -11,12 +11,38 @@
 #sudo dpkg -i arduino-core_0022+dfsg-1_all.deb
 
 
+# http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1286088093/34#34
+# http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1286088093/30#34
+
 sudo add-apt-repository ppa:arduino-ubuntu-team
 sudo apt-get update
-sudo apt-get install librxtx-java
+sudo apt-get install librxtx-java openjdk-6-jre gcc-avr
+
+#gksudo
+# http://www.pluggy.me.uk/arduino-ubuntu/
+
 sudo apt-get install arduino
 
+#dmesg
+# cat /etc/group |cut -d: -f1
+sudo addgroup $USER tty
+sudo addgroup $USER uucp
+
+
+# http://arduino.cc/playground/Interfacing/LinuxTTY
+stty -F /dev/ttyACM0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts
+read -p "Ready to try ArduinoMega blink? [Enter]"
+echo -n "Hello" > /dev/ttyACM0
+
+cd ~/ && wget http://arduino.googlecode.com/files/arduino-1.0-linux64.tgz
+tar -zxvf arduino-1.0-linux64.tgz
+
+cd arduino-1.0/ && ./arduino
+
 echo "Arduino IDE installation complete"
+
+# Ended up following: http://www.pluggy.me.uk/arduino-ubuntu/
+
 
 
 
