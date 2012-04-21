@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+#
+# Author: Carl Crott <carlcrott@gmail.com>
+# arduino setup script
+# chmod 755 my_script to make executeable
+
+# http://arduino.cc/forum/index.php?topic=50337.0
+#sudo apt-get install binutils-avr avr-libc avrdude gcc gcc-avr 
+#wget http://launchpadlibrarian.net/62000155/arduino-core_0022%2Bdfsg-1_all.deb
+#sudo dpkg -i arduino-core_0022+dfsg-1_all.deb
+
+
+sudo add-apt-repository ppa:arduino-ubuntu-team
+sudo apt-get update
+sudo apt-get install librxtx-java
+sudo apt-get install arduino
+
+echo "Arduino IDE installation complete"
+
+
+
+
+
+
+
+
+
+
+
